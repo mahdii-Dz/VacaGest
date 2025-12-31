@@ -102,7 +102,7 @@ export async function POST(request) {
       // Send email
       let emailSent = false;
       try {
-        const response = await fetch("http://localhost:3000/api/mail-otp", {
+        const response = await fetch("https://vacagest.netlify.app/api/mail-otp", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

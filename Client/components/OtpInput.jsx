@@ -25,7 +25,7 @@ export default function OtpInput() {
       const { fName, lName, email, phone, grade, specialty, statue, password } =
         FormData;
 
-      const response = await fetch("http://localhost:5000/api/user/create", {
+      const response = await fetch("https://vacagest.onrender.com/api/user/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
