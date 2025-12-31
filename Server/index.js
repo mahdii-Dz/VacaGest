@@ -3,30 +3,20 @@ import mongoose from "mongoose";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
 import route from "./routes/userRoute.js";
+import cors from "cors";
 
 dotenv.config();
 
 const app = express();
 
-// Manual CORS middleware
-app.use((req, res, next) => {
-  // Allow specific origin (your Next.js frontend)
-  res.header('Access-Control-Allow-Origin', 'https://vacagest.netlify.app/');
-  
-  // Or allow all origins (for development only)
-  // res.header('Access-Control-Allow-Origin', '*');
-  
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  
-  next();
-});
+app.use(
+  cors({
+    origin: ["https://vacagest.netlify.app", "http://localhost:3000"],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 app.use(bodyParser.json());
 
