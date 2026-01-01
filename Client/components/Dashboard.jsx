@@ -1,16 +1,6 @@
 "use client";
 import useLocalStorage from "@/components/useLocalStorage";
-import {
-  Calendar,
-  Clock,
-  FileText,
-  House,
-  Key,
-  LogOut,
-  Plus,
-  Settings,
-} from "lucide-react";
-import Image from "next/image";
+import { Calendar, Clock, FileText, Plus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -71,7 +61,7 @@ function Dashboard() {
   const handleLogout = () => {
     // Remove user data from localStorage
     removeUser();
-    window.location.href = "/Login";
+    router.push("/Login");
   };
 
   if (!isClient) {
@@ -92,191 +82,118 @@ function Dashboard() {
   const userSpecialty = user?.specialty || "";
 
   return (
-    <section className="flex">
-      <aside className="w-64 h-dvh flex flex-col border-r border-[#E5E7EB] items-center fixed top-0 left-0 bg-white">
-        <div className="w-full p-6 gap-1 border-b border-[#E5E7EB]">
-          <h2 className="text-2xl font-bold text-primary">Vaca Gest</h2>
-          <p className="text-sm text-[#6B7280]">Vacataires Management</p>
-        </div>
-        <div className="flex flex-col flex-1 w-full justify-start p-4 gap-2">
-          <div className="flex bg-primary justify-start w-full py-3 px-4 cursor-pointer items-center h-fit rounded-lg gap-3">
-            <House size={18} strokeWidth={2.5} className="text-white" />
-            <Link href={"/Dashboard"}>
-              <p className="text-sm font-medium text-white">Tableau de bord</p>
-            </Link>
-          </div>
-          <div className="flex justify-start w-full py-3 px-4 items-center h-fit rounded-lg gap-3 cursor-pointer hover:bg-gray-100">
-            <FileText size={18} strokeWidth={2.5} className="text-Paragraph" />
-            <Link href="/Fiches-pédagogiques">
-              <p className="text-sm font-medium text-Paragraph">
-                Fiches pédagogiques
-              </p>
-            </Link>
-          </div>
-          <div className="flex justify-start w-full py-3 px-4 items-center h-fit rounded-lg gap-3 cursor-pointer hover:bg-gray-100">
-            <Calendar size={18} strokeWidth={2.5} className="text-Paragraph" />
-            <Link href="/Fiches-mensuelles">
-              <p className="text-sm font-medium text-Paragraph">
-                Fiches mensuelles
-              </p>
-            </Link>
-          </div>
-          <div className="flex justify-start w-full py-3 px-4 items-center h-fit rounded-lg gap-3 cursor-pointer hover:bg-gray-100">
-            <Clock size={18} strokeWidth={2.5} className="text-Paragraph" />
-            <Link href="/Historique">
-              <p className="text-sm font-medium text-Paragraph">Historique</p>
-            </Link>
-          </div>
-          <div className="flex justify-start w-full py-3 px-4 items-center h-fit rounded-lg gap-3 cursor-pointer hover:bg-gray-100">
-            <Settings size={18} strokeWidth={2.5} className="text-Paragraph" />
-            <Link href="/Settings">
-              <p className="text-sm font-medium text-Paragraph">Paramètres</p>
-            </Link>
-          </div>
-        </div>
-        <div className="w-full p-6 gap-1 border-t border-[#E5E7EB]">
-          <div className="flex gap-3 justify-start items-center">
-            <Image
-              src={"profile.svg"}
-              width={40}
-              height={40}
-              alt="profile picture"
-            />
-            <div>
-              <h3 className="text-sm font-medium text-primary-text">
-                {fullName || "Utilisateur"}
-              </h3>
-              <p className="text-xs text-[#6B7280]">
-                {userRole}
-                {userSpecialty && ` • ${userSpecialty}`}
-              </p>
+    <main className="w-full h-dvh ml-64 bg-[#F9FAFB] text-dashboard p-12 flex flex-col gap-8">
+      <div>
+        <h1 className="text-3xl font-bold">
+          Bienvenue, {fullName || "Utilisateur"}
+        </h1>
+        <p className="text-[#4B5563]">
+          Voici un aperçu de vos activités et documents
+        </p>
+      </div>
+      <div className="flex items-center justify-between w-full gap-6">
+        <div className="bg-white border border-[#E5E7EB] p-6 rounded-xl flex flex-col gap-2 shadow-boxShadow w-full">
+          <div className="flex justify-between items-center">
+            <div className="size-12 bg-[#DBEAFE] rounded-lg flex items-center justify-center">
+              <FileText size={18} strokeWidth={2.5} className="text-primary" />
+            </div>
+            <div className="py-1 px-3 text-[#15803D] bg-[#DCFCE7] w-fit rounded-full text-xs font-medium">
+              Validée
             </div>
           </div>
-          <div className="flex justify-center items-center mt-4 gap-3 cursor-pointer">
-            <LogOut size={14} strokeWidth={2.5} />
-            <p onClick={handleLogout} className="text-sm text-primary-text">Déconnexion</p>
-          </div>
-        </div>
-      </aside>
-      <main className="w-full h-dvh ml-64 bg-[#F9FAFB] text-dashboard p-12 flex flex-col gap-8">
-        <div>
-          <h1 className="text-3xl font-bold">
-            Bienvenue, {fullName || "Utilisateur"}
-          </h1>
-          <p className="text-[#4B5563]">
-            Voici un aperçu de vos activités et documents
+          <p className="text-sm font-medium text-[#4B5563]">
+            Fiche pédagogique
+          </p>
+          <h3 className="text-2xl font-bold">3/5</h3>
+          <p className="text-sm font-medium text-[#4B5563]">
+            3 validées, 2 en attente
           </p>
         </div>
-        <div className="flex items-center justify-between w-full gap-6">
-          <div className="bg-white border border-[#E5E7EB] p-6 rounded-xl flex flex-col gap-2 shadow-boxShadow w-full">
-            <div className="flex justify-between items-center">
-              <div className="size-12 bg-[#DBEAFE] rounded-lg flex items-center justify-center">
-                <FileText
-                  size={18}
-                  strokeWidth={2.5}
-                  className="text-primary"
-                />
-              </div>
-              <div className="py-1 px-3 text-[#15803D] bg-[#DCFCE7] w-fit rounded-full text-xs font-medium">
-                Validée
-              </div>
+        <div className="bg-white border border-[#E5E7EB] p-6 rounded-xl flex flex-col gap-2 shadow-boxShadow w-full">
+          <div className="flex justify-between items-center">
+            <div className="size-12 bg-[#F3E8FF] rounded-lg flex items-center justify-center">
+              <Calendar
+                size={18}
+                strokeWidth={2.5}
+                className="text-[#9333EA]"
+              />
             </div>
-            <p className="text-sm font-medium text-[#4B5563]">
-              Fiche pédagogique
-            </p>
-            <h3 className="text-2xl font-bold">3/5</h3>
-            <p className="text-sm font-medium text-[#4B5563]">
-              3 validées, 2 en attente
-            </p>
+            <div className="py-1 px-3 text-[#C2410C] bg-[#FFEDD5] w-fit rounded-full text-xs font-medium">
+              En attente
+            </div>
           </div>
-          <div className="bg-white border border-[#E5E7EB] p-6 rounded-xl flex flex-col gap-2 shadow-boxShadow w-full">
-            <div className="flex justify-between items-center">
-              <div className="size-12 bg-[#F3E8FF] rounded-lg flex items-center justify-center">
-                <Calendar
-                  size={18}
-                  strokeWidth={2.5}
-                  className="text-[#9333EA]"
-                />
-              </div>
-              <div className="py-1 px-3 text-[#C2410C] bg-[#FFEDD5] w-fit rounded-full text-xs font-medium">
-                En attente
-              </div>
-            </div>
-            <p className="text-sm font-medium text-[#4B5563]">
-              Fiche mensuelle
-            </p>
-            <h3 className="text-2xl font-bold">2/3</h3>
-            <p className="text-sm font-medium text-[#4B5563]">
-              2 validées, 1 en attente
-            </p>
+          <p className="text-sm font-medium text-[#4B5563]">Fiche mensuelle</p>
+          <h3 className="text-2xl font-bold">2/3</h3>
+          <p className="text-sm font-medium text-[#4B5563]">
+            2 validées, 1 en attente
+          </p>
+        </div>
+        <div className="bg-white border border-[#E5E7EB] p-6 rounded-xl flex flex-col gap-2 shadow-boxShadow w-full">
+          <div className="size-12 bg-[#E0E7FF] rounded-lg flex items-center justify-center">
+            <Clock size={18} strokeWidth={2.5} className="text-[#4F46E5]" />
           </div>
-          <div className="bg-white border border-[#E5E7EB] p-6 rounded-xl flex flex-col gap-2 shadow-boxShadow w-full">
-            <div className="size-12 bg-[#E0E7FF] rounded-lg flex items-center justify-center">
-              <Clock size={18} strokeWidth={2.5} className="text-[#4F46E5]" />
-            </div>
-            <p className="text-sm font-medium text-[#4B5563]">Total heures</p>
-            <h3 className="text-2xl font-bold">156h</h3>
-            <p className="text-sm font-medium text-[#4B5563]">
-              Ce semestre académique
-            </p>
+          <p className="text-sm font-medium text-[#4B5563]">Total heures</p>
+          <h3 className="text-2xl font-bold">156h</h3>
+          <p className="text-sm font-medium text-[#4B5563]">
+            Ce semestre académique
+          </p>
+        </div>
+      </div>
+      <div className="w-full rounded-xl p-6 bg-white flex flex-col gap-4 shadow-boxShadow border border-[#E5E7EB]">
+        <h3 className="text-lg font-semibold">Actions rapides</h3>
+        <div className="w-full flex justify-between gap-7.5 items-center">
+          <div className="w-full py-4 bg-primary  rounded-lg text-white cursor-pointer">
+            <Link
+              href={"/Dashboard/Fiches-pedagogiques"}
+              className="flex justify-center items-center gap-2"
+            >
+              <Plus size={20} strokeWidth={2.5} />
+              <span>Nouvelle fiche pédagogique</span>
+            </Link>
+          </div>
+          <div className="w-full py-4 bg-[#9333EA] rounded-lg text-white cursor-pointer">
+            <Link
+              href={"/Dashboard/Fiches-mensuelles"}
+              className="flex justify-center items-center gap-2"
+            >
+              <Plus size={20} strokeWidth={2.5} />
+              <span>Nouvelle fiche mensuelle</span>
+            </Link>
           </div>
         </div>
-        <div className="w-full rounded-xl p-6 bg-white flex flex-col gap-4 shadow-boxShadow border border-[#E5E7EB]">
-          <h3 className="text-lg font-semibold">Actions rapides</h3>
-          <div className="w-full flex justify-between gap-7.5 items-center">
-            <div className="w-full py-4 bg-primary  rounded-lg text-white cursor-pointer">
-              <Link
-                href={"/Fiches-pédagogiques"}
-                className="flex justify-center items-center gap-2"
-              >
-                <Plus size={20} strokeWidth={2.5} />
-                <span>Nouvelle fiche pédagogique</span>
-              </Link>
-            </div>
-            <div className="w-full py-4 bg-[#9333EA] rounded-lg text-white cursor-pointer">
-              <Link
-                href={"/Fiches-mensuelles"}
-                className="flex justify-center items-center gap-2"
-              >
-                <Plus size={20} strokeWidth={2.5} />
-                <span>Nouvelle fiche mensuelle</span>
-              </Link>
-            </div>
-          </div>
-        </div>
-        <div className="w-full rounded-xl p-6 bg-white flex flex-col gap-4 shadow-boxShadow border border-[#E5E7EB]">
-          <h3 className="text-lg font-semibold">Documents récents</h3>
-          <div className="flex flex-col gap-4">
-            <CardItem
-              title="Fiche pédagogique - Mathématiques L1"
-              date="Soumis le 15 Jan 2024"
-              status="Validée"
-              icon={FileText}
-              iconColor="text-primary"
-              bgColor="bg-blue-100"
-            />
+      </div>
+      <div className="w-full rounded-xl p-6 bg-white flex flex-col gap-4 shadow-boxShadow border border-[#E5E7EB]">
+        <h3 className="text-lg font-semibold">Documents récents</h3>
+        <div className="flex flex-col gap-4">
+          <CardItem
+            title="Fiche pédagogique - Mathématiques L1"
+            date="Soumis le 15 Jan 2024"
+            status="Validée"
+            icon={FileText}
+            iconColor="text-primary"
+            bgColor="bg-blue-100"
+          />
 
-            <CardItem
-              title="Fiche mensuelle - Janvier 2024"
-              date="Soumis le 10 Jan 2024"
-              status="En attente"
-              icon={Calendar}
-              iconColor="text-[#9333EA]"
-              bgColor="bg-purple-100"
-            />
+          <CardItem
+            title="Fiche mensuelle - Janvier 2024"
+            date="Soumis le 10 Jan 2024"
+            status="En attente"
+            icon={Calendar}
+            iconColor="text-[#9333EA]"
+            bgColor="bg-purple-100"
+          />
 
-            <CardItem
-              title="Fiche pédagogique - Physique L2"
-              date="Soumis le 08 Jan 2024"
-              status="Rejetée"
-              icon={FileText}
-              iconColor="text-primary"
-              bgColor="bg-blue-100"
-            />
-          </div>
+          <CardItem
+            title="Fiche pédagogique - Physique L2"
+            date="Soumis le 08 Jan 2024"
+            status="Rejetée"
+            icon={FileText}
+            iconColor="text-primary"
+            bgColor="bg-blue-100"
+          />
         </div>
-      </main>
-    </section>
+      </div>
+    </main>
   );
 }
 

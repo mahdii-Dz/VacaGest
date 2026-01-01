@@ -1,12 +1,12 @@
-import Dashboard from "@/components/Dashboard";
 import SideBar from "@/components/SideBar";
+import React from "react";
 
 function page() {
   return (
-    <section className="flex">
+    <>
       <SideBar />
-      <Dashboard />
-    </section>
+      <div className="ml-64 p-12">hello</div>
+    </>
   );
 }
 
