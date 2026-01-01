@@ -2,8 +2,10 @@ import express from "express";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
-import route from "./routes/userRoute.js";
 import cors from "cors";
+import userRoute from "./routes/userRoute.js";
+import fileRoute from "./routes/fileRoute.js";
+import gridfs from "./config/gridfs.js";
 
 dotenv.config();
 
@@ -27,10 +29,12 @@ mongoose
   .connect(MONGOURL)
   .then(() => {
     console.log("Database connected successfully.");
+    gridfs();
     app.listen(PORT, () => {
-      console.log(`Server is running on port : ${PORT}`);
+      console.log(`Server is running on port: ${PORT}`);
     });
   })
   .catch((error) => console.log(error));
 
-app.use("/api/user", route);
+app.use("/api/user", userRoute);
+app.use("/api/files", fileRoute);
