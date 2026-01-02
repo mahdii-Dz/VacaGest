@@ -1,49 +1,52 @@
 "use client";
 
-import {
-  BookOpen,
-  Plus,
-  Trash2,
-  FileDown,
-  Send,
-  Save,
-} from "lucide-react";
+import { BookOpen, Plus, Trash2, FileDown, Send, Save, Check } from "lucide-react";
 import { useState } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import AjouterModuleModal from "@/components/AjouterModuleModal";
 import SideBar from "@/components/SideBar";
+import useLocalStorage from "@/components/useLocalStorage";
+import handleSend from "@/components/handleSend";
 
 export default function Page() {
+  const [user] = useLocalStorage("userData");
   const [openModal, setOpenModal] = useState(false);
+  const [rows, setRows] = useState([]);
+  const date = new Date(user?.createdAt);
+  const readableDate = date.toLocaleDateString("fr-FR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  const AnneeUniversitaire = `${date.getFullYear()}-${date.getFullYear() + 1}`;
+  const fullName = user ? `${user.fName} ${user.lName}`.trim() : "";
+  const userSpecialty = user?.specialty || "";
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 
-  const [rows, setRows] = useState([
-    {
-      module: "Algorithmique Avancée",
-      section: "L3 Informatique",
-      type: "Cours",
-      heures: 3,
-      salle: "Amphi A",
-      departement: "Informatique",
-    },
-    {
-      module: "Bases de Données",
-      section: "L3 Informatique",
-      type: "TD",
-      heures: 2,
-      salle: "Salle TD-12",
-      departement: "Informatique",
-    },
-    {
-      module: "Programmation Web",
-      section: "M1 Informatique",
-      type: "TP",
-      heures: 4,
-      salle: "Lab Info 3",
-      departement: "Informatique",
-    },
-  ]);
+  const handleSubmit = async () => {
+    if (isSubmitting || hasSubmitted) return;
 
+    setIsSubmitting(true);
+
+    try {
+      await handleSend({
+        generatePDF: handleGeneratePDF,
+        vacataireId: user?._id,
+        type: "pedagogique",
+        status: "pending",
+      });
+
+      alert("✅ Déclaration soumise avec succès !");
+      setHasSubmitted(true); // 🔒 Lock further submissions
+    } catch (err) {
+      console.error(err);
+      alert(`❌ Erreur: ${err.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
   const handleAddRow = (newRow) => {
     setRows((prev) => [...prev, newRow]);
   };
@@ -62,8 +65,8 @@ export default function Page() {
     doc.text("Fiche Pédagogique – Semestre 1", 14, 20);
 
     doc.setFontSize(11);
-    doc.text("Année Universitaire : 2023-2024", 14, 30);
-    doc.text("Nom & Prénom : Dr. Koull Mohammed", 14, 38);
+    doc.text(`Année Universitaire : ${AnneeUniversitaire}`, 14, 30);
+    doc.text(`Nom & Prénom : ${fullName}`, 14, 38);
     doc.text("Département : Informatique", 14, 46);
 
     autoTable(doc, {
@@ -82,18 +85,20 @@ export default function Page() {
       ]),
     });
 
-    // Safely access finalY 
-    const finalY = doc.lastAutoTable?.finalY ? doc.lastAutoTable.finalY + 10 : 150;
+    const finalY = doc.lastAutoTable?.finalY
+      ? doc.lastAutoTable.finalY + 10
+      : 150;
 
     doc.setFontSize(12);
     doc.text(`Total des heures : ${total} heures`, 14, finalY);
 
-    doc.save("fiche_pedagogique.pdf");
+    // Return the PDF as a Blob
+    return doc.output("blob");
   };
 
   return (
     <div className="flex">
-      <SideBar/>
+      <SideBar />
       <main className="flex-1 p-12 ml-64 space-y-6 text-black bg-gray-50">
         {/* Header */}
         <div className="bg-white rounded-xl p-6 shadow-sm ring-1 ring-gray-200">
@@ -111,9 +116,9 @@ export default function Page() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 bg-gray-50 p-4 rounded-lg">
-            <Info label="Nom & Prénom" value="Dr. Koull Mohammed" />
-            <Info label="Département" value="Informatique" />
-            <Info label="Date de création" value="12 Octobre 2023" />
+            <Info label="Nom & Prénom" value={fullName} />
+            <Info label="Département" value={userSpecialty} />
+            <Info label="Date de création" value={readableDate} />
           </div>
         </div>
 
@@ -121,7 +126,9 @@ export default function Page() {
         <div className="bg-white rounded-xl shadow-sm ring-1 ring-gray-200">
           <div className="p-6 border-b border-gray-200">
             <BookOpen size={16} className="text-blue-600 inline mr-2" />
-            <h2 className="font-semibold inline">Modules d&apos;Enseignement</h2>
+            <h2 className="font-semibold inline">
+              Modules d&apos;Enseignement
+            </h2>
             <p className="text-sm text-gray-500 mt-1">
               Ajoutez les modules que vous enseignez ce semestre
             </p>
@@ -132,14 +139,18 @@ export default function Page() {
               <tr>
                 <th className="p-3 border border-gray-200 text-left">#</th>
                 <th className="p-3 border border-gray-200 text-left">Module</th>
-                <th className="p-3 border border-gray-200 text-left">Section</th>
+                <th className="p-3 border border-gray-200 text-left">
+                  Section
+                </th>
                 <th className="p-3 border border-gray-200 text-left">Type</th>
                 <th className="p-3 border border-gray-200 text-left">Heures</th>
                 <th className="p-3 border border-gray-200 text-left">Salle</th>
                 <th className="p-3 border border-gray-200 text-left">
                   Département
                 </th>
-                <th className="p-3 border border-gray-200 text-left">Actions</th>
+                <th className="p-3 border border-gray-200 text-left">
+                  Actions
+                </th>
               </tr>
             </thead>
 
@@ -152,7 +163,9 @@ export default function Page() {
                   <td className="p-3 border border-gray-200">{r.type}</td>
                   <td className="p-3 border border-gray-200">{r.heures}</td>
                   <td className="p-3 border border-gray-200">{r.salle}</td>
-                  <td className="p-3 border border-gray-200">{r.departement}</td>
+                  <td className="p-3 border border-gray-200">
+                    {r.departement}
+                  </td>
                   <td className="p-3 border border-gray-200">
                     <button
                       onClick={() => handleDeleteRow(i)}
@@ -191,21 +204,51 @@ export default function Page() {
 
           <div className="flex gap-3">
             <button
-              onClick={handleGeneratePDF}
+              onClick={() => {
+                const pdfBlob = handleGeneratePDF();
+                const url = URL.createObjectURL(pdfBlob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "fiche_pedagogique.pdf";
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-700 text-white hover:bg-gray-800"
             >
               <FileDown size={16} /> Télécharger PDF
             </button>
 
-            <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
-              <Send size={16} /> Soumettre
+            <button
+              onClick={handleSubmit}
+              disabled={isSubmitting || hasSubmitted}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg ${hasSubmitted
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
+                } text-white`}
+            >
+              {isSubmitting ? (
+                <>
+                  <Check size={16} /> Envoi en cours...
+                </>
+              ) : hasSubmitted ? (
+                <>
+                  <Check size={16} /> Soumis avec succès
+                </>
+              ) : (
+                <>
+                  <Check size={16} /> Soumettre pour validation
+                </>
+              )}
             </button>
           </div>
         </div>
 
         {/* Modal */}
         {openModal && (
-          <AjouterModuleModal onClose={() => setOpenModal(false)} onAdd={handleAddRow} />
+          <AjouterModuleModal
+            onClose={() => setOpenModal(false)}
+            onAdd={handleAddRow}
+          />
         )}
       </main>
     </div>

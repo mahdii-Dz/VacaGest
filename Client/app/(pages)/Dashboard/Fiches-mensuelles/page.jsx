@@ -1,29 +1,51 @@
 "use client";
 
-import { useState, useRef, forwardRef } from "react";
+import { useState } from "react";
 import { Save, Check, FileDown } from "lucide-react";
 import AjouterSeanceModal from "@/components/AjouterSeanceModal";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import SideBar from "@/components/SideBar";
-
-const initialRows = [
-  { date: "05/03/2024", seance: "Mathématiques I - Algèbre I", type: "Cours", heures: 3 },
-  { date: "07/03/2024", seance: "Mathématiques I - Algèbre I", type: "TD", heures: 2 },
-  { date: "12/03/2024", seance: "Physique II - Mécanique", type: "TP", heures: 4 },
-];
+import useLocalStorage from "@/components/useLocalStorage";
+import handleSend from "@/components/handleSend";
 
 export default function Page() {
+  const [user] = useLocalStorage("userData");
   const [commentaire, setCommentaire] = useState("");
   const [openModal, setOpenModal] = useState(false);
   const [editingData, setEditingData] = useState(null);
-  const [rows, setRows] = useState(initialRows);
+  const [rows, setRows] = useState([]);
+  const [mois, setMois] = useState("septembre");
+  const [numeroVacataire, setNumeroVacataire] = useState("VAC-2025-0158");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 
+  const handleSubmit = async () => {
+    if (isSubmitting || hasSubmitted) return;
+
+    setIsSubmitting(true);
+
+    try {
+      await handleSend({
+        generatePDF: handleGeneratePDF,
+        vacataireId: user?._id,
+        type: "mensuelle",
+        month: mois,
+        year: "2024",
+        status: "pending",
+      });
+
+      alert("✅ Déclaration soumise avec succès !");
+      setHasSubmitted(true); // 🔒 Lock further submissions
+    } catch (err) {
+      console.error(err);
+      alert(`❌ Erreur: ${err.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+  const fullName = user ? `${user.fName} ${user.lName}`.trim() : "";
   const total = rows.reduce((s, r) => s + r.heures, 0);
-
-  const nomRef = useRef(null);
-  const moisRef = useRef(null);
-  const numRef = useRef(null);
 
   const handleAddRow = (newRow) => setRows((prev) => [...prev, newRow]);
 
@@ -38,19 +60,16 @@ export default function Page() {
     );
   };
 
+  // ✅ PDF Generator (uses state, not refs)
   const handleGeneratePDF = () => {
     const doc = new jsPDF();
-
-    const fullName = nomRef.current?.value || "";
-    const mois = moisRef.current?.value || "";
-    const numero = numRef.current?.value || "";
 
     doc.setFontSize(14);
     doc.text("Déclaration Mensuelle d'Heures", 14, 20);
     doc.setFontSize(10);
     doc.text(`Nom complet : ${fullName}`, 14, 30);
     doc.text(`Mois : ${mois}`, 14, 36);
-    doc.text(`Numéro de vacataire : ${numero}`, 14, 42);
+    doc.text(`Numéro de vacataire : ${numeroVacataire}`, 14, 42);
 
     autoTable(doc, {
       startY: 50,
@@ -58,8 +77,9 @@ export default function Page() {
       body: rows.map((r) => [r.date, r.seance, r.type, r.heures]),
     });
 
-    // Get final Y position after table
-    const finalY = doc.lastAutoTable?.finalY ? doc.lastAutoTable.finalY + 10 : 150;
+    const finalY = doc.lastAutoTable?.finalY
+      ? doc.lastAutoTable.finalY + 10
+      : 150;
 
     doc.setFontSize(11);
     doc.text(`Total des heures : ${total}`, 14, finalY);
@@ -70,17 +90,19 @@ export default function Page() {
       doc.text(commentaire, 14, finalY + 16, { maxWidth: 180 });
     }
 
-    doc.save("declaration_mensuelle_heures.pdf");
+    return doc.output("blob");
   };
 
   return (
     <div className="flex">
-      <SideBar/>
+      <SideBar />
       <main className="flex-1 ml-64 p-12 space-y-6 text-black">
         {/* Header */}
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-2xl font-bold">Déclaration Mensuelle d&apos;Heures</h1>
+            <h1 className="text-2xl font-bold">
+              Déclaration Mensuelle d&apos;Heures
+            </h1>
             <p>Mars 2024 – Année universitaire 2024-2025</p>
           </div>
           <button className="px-4 py-2 rounded-lg bg-blue-100 border border-blue-200">
@@ -92,9 +114,25 @@ export default function Page() {
         <div className="bg-white p-6 rounded-xl shadow-sm ring-1 ring-gray-200">
           <h2 className="font-semibold mb-6">Informations générales</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Input ref={nomRef} label="Nom complet" defaultValue="Koull Mohammed" />
-            <Input ref={moisRef} label="Mois" defaultValue="Mars 2024" />
-            <Input ref={numRef} label="Numéro de vacataire" defaultValue="VAC-2024-0158" />
+            <Info label="Nom complet" value={fullName} />
+            <div>
+              <label className="text-sm font-medium block mb-1">Mois</label>
+              <input
+                value={mois}
+                onChange={(e) => setMois(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg bg-gray-50 ring-1 ring-gray-200"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium block mb-1">
+                Numéro de vacataire
+              </label>
+              <input
+                value={numeroVacataire}
+                onChange={(e) => setNumeroVacataire(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg bg-gray-50 ring-1 ring-gray-200"
+              />
+            </div>
           </div>
         </div>
 
@@ -120,7 +158,9 @@ export default function Page() {
                 <th className="p-3 border border-gray-200 text-left">Séance</th>
                 <th className="p-3 border border-gray-200 text-left">Nature</th>
                 <th className="p-3 border border-gray-200 text-left">Heures</th>
-                <th className="p-3 border border-gray-200 text-center">Action</th>
+                <th className="p-3 border border-gray-200 text-center">
+                  Action
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -170,13 +210,40 @@ export default function Page() {
           </button>
           <div className="flex gap-3">
             <button
-              onClick={handleGeneratePDF}
+              onClick={() => {
+                const pdfBlob = handleGeneratePDF();
+                const url = URL.createObjectURL(pdfBlob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "declaration_mensuelle_heures.pdf";
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-700 text-white hover:bg-gray-800"
             >
               <FileDown size={16} /> Télécharger PDF
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">
-              <Check size={16} /> Soumettre pour validation
+            <button
+              onClick={handleSubmit}
+              disabled={isSubmitting || hasSubmitted}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg ${hasSubmitted
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+                } text-white`}
+            >
+              {isSubmitting ? (
+                <>
+                  <Check size={16} /> Envoi en cours...
+                </>
+              ) : hasSubmitted ? (
+                <>
+                  <Check size={16} /> Soumis avec succès
+                </>
+              ) : (
+                <>
+                  <Check size={16} /> Soumettre pour validation
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -195,19 +262,12 @@ export default function Page() {
   );
 }
 
-// Input avec forwardRef
-const Input = forwardRef((props, ref) => {
-  const { label, defaultValue } = props;
+// Reusable Info component
+function Info({ label, value }) {
   return (
     <div>
-      <label className="text-sm font-medium">{label}</label>
-      <input
-        ref={ref}
-        defaultValue={defaultValue}
-        className="mt-1 w-full px-3 py-2 rounded-lg bg-gray-50 ring-1 ring-gray-200"
-      />
+      <p className="text-xs text-gray-500 uppercase">{label}</p>
+      <p className="font-medium">{value}</p>
     </div>
-  );
-});
-
-Input.displayName = "Input";
+  )
+}
