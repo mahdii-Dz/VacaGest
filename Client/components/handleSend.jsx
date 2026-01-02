@@ -1,4 +1,3 @@
-// components/handleSend.js
 export default async function handleSend({
   generatePDF,
   vacataireId,

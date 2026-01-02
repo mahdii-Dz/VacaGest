@@ -3,24 +3,21 @@ import useLocalStorage from "@/components/useLocalStorage";
 import { Calendar, Clock, FileText, Plus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const StatusBadge = ({ status, color }) => {
   const colors = {
-    Validée: { bg: "bg-green-100", text: "text-green-700" },
-    "En attente": { bg: "bg-orange-100", text: "text-orange-700" },
-    Rejetée: { bg: "bg-red-100", text: "text-red-700" },
+    validated: { bg: "bg-green-100", text: "text-green-700" },
+    pending: { bg: "bg-orange-100", text: "text-orange-700" },
+    rejected: { bg: "bg-red-100", text: "text-red-700" },
   };
 
   return (
-    <div className={`px-3 py-1 ${colors[status]?.bg || color.bg} rounded-full`}>
-      <span
-        className={`font-semibold text-xs ${
-          colors[status]?.text || color.text
-        }`}
-      >
-        {status}
-      </span>
+    <div className={`px-3 ${colors[status]?.bg} py-1 rounded-full font-semibold text-xs ${colors[status]?.text || color?.text
+      }`}>
+      {
+        status === "validated" ? "Validée" : status === "pending" ? "En attente" : status === "rejected" ? "Rejetée" : "Inconnu"
+      }
     </div>
   );
 };
@@ -49,20 +46,42 @@ const CardItem = ({
   </div>
 );
 
+
+
 function Dashboard() {
   const [user, setUser, removeUser, isClient] = useLocalStorage("userData");
+  const [FichePedagogiqueData, setFichePedagogiqueData] = useState([]);
+  const [FicheMensuelleData, setFicheMensuelleData] = useState([]);
   const router = useRouter();
+
+
+  useEffect(() => {
+    if (!isClient) return
+    async function fetchFilesData() {
+      try {
+        const response = await fetch(`https://vacagest.onrender.com/api/files?vacataireId=${user?._id}`);
+        const data = await response.json();
+        console.log("Données des fichiers reçues du serveur :", data);
+        const pedagogicalFiles = data.filter(file => file.metadata.type === "pedagogique");
+        setFichePedagogiqueData(pedagogicalFiles || null);
+        const monthlyFiles = data.filter(file => file.metadata.type === "mensuelle");
+        setFicheMensuelleData(monthlyFiles || null);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des données des fichiers :", error);
+      }
+    }
+    fetchFilesData()
+  }, [isClient, user?._id])
+  const ValidatedFicheMensuelle = FicheMensuelleData.filter(file => file?.metadata.status === "validated");
+  const pendingFicheMensuelle = FicheMensuelleData.filter(file => file?.metadata.status === "pending");
+ 
 
   useEffect(() => {
     if (isClient && !user) {
       router.push("/Login");
     }
   }, [isClient, user, router]);
-  const handleLogout = () => {
-    // Remove user data from localStorage
-    removeUser();
-    router.push("/Login");
-  };
+
 
   if (!isClient) {
     return (
@@ -75,11 +94,6 @@ function Dashboard() {
   // Get full name from user data
   const fullName = user ? `${user.fName} ${user.lName}`.trim() : "";
 
-  // Get user role/status
-  const userRole = user?.statue || user?.grade || "Vacataire";
-
-  // Get specialty if available
-  const userSpecialty = user?.specialty || "";
 
   return (
     <main className="w-full h-dvh ml-64 bg-[#F9FAFB] text-dashboard p-12 flex flex-col gap-8">
@@ -97,16 +111,20 @@ function Dashboard() {
             <div className="size-12 bg-[#DBEAFE] rounded-lg flex items-center justify-center">
               <FileText size={18} strokeWidth={2.5} className="text-primary" />
             </div>
-            <div className="py-1 px-3 text-[#15803D] bg-[#DCFCE7] w-fit rounded-full text-xs font-medium">
-              Validée
-            </div>
+            <StatusBadge status={FichePedagogiqueData[0]?.metadata.status} />
           </div>
           <p className="text-sm font-medium text-[#4B5563]">
             Fiche pédagogique
           </p>
-          <h3 className="text-2xl font-bold">3/5</h3>
-          <p className="text-sm font-medium text-[#4B5563]">
-            3 validées, 2 en attente
+          <h3 className="text-2xl font-bold">
+            {
+              FichePedagogiqueData.length
+            }
+          </h3>
+          <p className="text-sm font-medium text-[#4B5563] ">
+            {
+              FichePedagogiqueData[0]?.metadata.status === "pending" ? "En attente de validation" : FichePedagogiqueData[0]?.metadata.status === "rejected" ? "Rejetée" : "Validée"
+            }
           </p>
         </div>
         <div className="bg-white border border-[#E5E7EB] p-6 rounded-xl flex flex-col gap-2 shadow-boxShadow w-full">
@@ -123,9 +141,11 @@ function Dashboard() {
             </div>
           </div>
           <p className="text-sm font-medium text-[#4B5563]">Fiche mensuelle</p>
-          <h3 className="text-2xl font-bold">2/3</h3>
+          <h3 className="text-2xl font-bold">
+            {ValidatedFicheMensuelle.length}/{FicheMensuelleData.length}
+          </h3>
           <p className="text-sm font-medium text-[#4B5563]">
-            2 validées, 1 en attente
+            {ValidatedFicheMensuelle.length} validées, {pendingFicheMensuelle.length} en attente
           </p>
         </div>
         <div className="bg-white border border-[#E5E7EB] p-6 rounded-xl flex flex-col gap-2 shadow-boxShadow w-full">
@@ -168,7 +188,7 @@ function Dashboard() {
           <CardItem
             title="Fiche pédagogique - Mathématiques L1"
             date="Soumis le 15 Jan 2024"
-            status="Validée"
+            status="validated"
             icon={FileText}
             iconColor="text-primary"
             bgColor="bg-blue-100"
@@ -177,7 +197,7 @@ function Dashboard() {
           <CardItem
             title="Fiche mensuelle - Janvier 2024"
             date="Soumis le 10 Jan 2024"
-            status="En attente"
+            status="pending"
             icon={Calendar}
             iconColor="text-[#9333EA]"
             bgColor="bg-purple-100"
@@ -186,7 +206,7 @@ function Dashboard() {
           <CardItem
             title="Fiche pédagogique - Physique L2"
             date="Soumis le 08 Jan 2024"
-            status="Rejetée"
+            status="rejected"
             icon={FileText}
             iconColor="text-primary"
             bgColor="bg-blue-100"
