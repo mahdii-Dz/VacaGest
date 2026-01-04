@@ -106,3 +106,16 @@ export const deleteUser = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error." });
   }
 };
+
+export const getUser = async (req, res) => {
+  try {
+    const email = req.params.email;
+    const user = await User.findOne({ email });
+    res.status(200).json({
+      message: "Register successful.",
+      user: user,
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error." });
+  }
+};
