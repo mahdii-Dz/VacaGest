@@ -2,6 +2,7 @@
 export default async function handleSend({
   generatePDF,
   vacataireId,
+  hours,
   type,
   fullName, 
   month = "",

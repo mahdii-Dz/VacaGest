@@ -16,7 +16,7 @@ export default function Page() {
   const [editingData, setEditingData] = useState(null);
   const [rows, setRows] = useState([]);
   const [mois, setMois] = useState("septembre");
-  const [numeroVacataire, setNumeroVacataire] = useState("VAC-2025-0158");
+  const [annee, setAnnee] = useState("2025");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const fullName = user ? `${user.fName} ${user.lName}`.trim() : "";
@@ -32,7 +32,7 @@ export default function Page() {
         type: "mensuelle",
         fullName: fullName,
         month: mois,
-        year: "2025",
+        year: annee,
         status: "pending",
       });
 
@@ -71,7 +71,6 @@ export default function Page() {
     doc.setFontSize(10);
     doc.text(`Nom complet : ${fullName}`, 14, 30);
     doc.text(`Mois : ${mois}`, 14, 36);
-    doc.text(`Numéro de vacataire : ${numeroVacataire}`, 14, 42);
 
     autoTable(doc, {
       startY: 50,
@@ -107,9 +106,6 @@ export default function Page() {
             </h1>
             <p>Année universitaire 2024-2025</p>
           </div>
-          <button className="px-4 py-2 rounded-lg bg-blue-100 border border-blue-200">
-            Brouillon
-          </button>
         </div>
 
         {/* Infos générales */}
@@ -127,11 +123,11 @@ export default function Page() {
             </div>
             <div>
               <label className="text-sm font-medium block mb-1">
-                Numéro de vacataire
+                année
               </label>
               <input
-                value={numeroVacataire}
-                onChange={(e) => setNumeroVacataire(e.target.value)}
+                value={annee}
+                onChange={(e) => setAnnee(e.target.value)}
                 className="w-full px-3 py-2 rounded-lg bg-gray-50 ring-1 ring-gray-200"
               />
             </div>

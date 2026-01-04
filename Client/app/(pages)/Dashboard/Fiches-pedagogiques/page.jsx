@@ -24,6 +24,7 @@ export default function Page() {
   const userSpecialty = user?.specialty || "";
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const total = rows.reduce((s, r) => s + r.heures, 0);
 
   const handleSubmit = async () => {
     if (isSubmitting || hasSubmitted) return;
@@ -34,6 +35,7 @@ export default function Page() {
       await handleSend({
         generatePDF: handleGeneratePDF,
         vacataireId: user?._id,
+        hours: total,
         fullName: fullName,
         type: "pedagogique",
         status: "pending",
@@ -57,7 +59,7 @@ export default function Page() {
     setRows((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const total = rows.reduce((s, r) => s + r.heures, 0);
+
 
   /* ===== PDF GENERATION ===== */
   const handleGeneratePDF = () => {

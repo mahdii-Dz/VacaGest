@@ -43,10 +43,6 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
-    hours:{
-      type: Number,
-      default: 0,
-    }
   },
   { timestamps: true }
 );

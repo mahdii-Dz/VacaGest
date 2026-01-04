@@ -19,6 +19,10 @@ const PdfSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     required: true
   },
+  hours:{
+    type: Number,
+    default: 0
+  },
 
   status: {
     type: String,
