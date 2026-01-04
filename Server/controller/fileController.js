@@ -51,7 +51,7 @@ export const uploadFile = async (req, res) => {
       }
     }
 
-    const filename = `${Date.now()}-${req.file.originalname}`;
+    const filename = req.file.originalname;
     const metadata = {
       vacataireId,
       type,
