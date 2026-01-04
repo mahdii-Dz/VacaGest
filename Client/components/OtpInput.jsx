@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useContext, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { GLobalContext } from "@/app/AppContext/Context";
+import FetchUser from "./FetchUser";
 
 export default function OtpInput() {
   const { FormData, setFormData } = useContext(GLobalContext);
@@ -18,6 +19,12 @@ export default function OtpInput() {
   const router = useRouter();
   const verificationAttemptsRef = useRef(0);
   const isVerifyingRef = useRef(false);
+
+  useEffect(() => {
+    if (localStorage.getItem("userData")) {
+      window.location.href = "/Dashboard";
+    }
+  }, []);
 
   // Function to create user
   const createUser = async () => {
@@ -44,7 +51,6 @@ export default function OtpInput() {
       });
 
       const data = await response.json();
-      console.log("User created:", data);
       return data;
     } catch (error) {
       console.error("Error creating user:", error);
@@ -323,18 +329,20 @@ export default function OtpInput() {
           emailVerified: true,
         }));
 
-        // Store in localStorage
-        localStorage.setItem(
-          "userData",
-          JSON.stringify({
-            ...FormData,
-            emailVerified: true,
-          })
-        );
 
+        
         // Create user after verification
         try {
           await createUser();
+          const userData = await FetchUser({email: FormData.email});
+          const user = userData.userData;
+          localStorage.setItem(
+            "userData",
+            JSON.stringify({
+              ...user,
+              emailVerified: true,
+            })
+          );
           setTimeout(() => {
             router.push("/Dashboard");
           }, 2500);
@@ -446,13 +454,12 @@ export default function OtpInput() {
                 onChange={(e) => handleChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 onPaste={handlePaste}
-                className={`w-14 h-14 text-2xl text-center border-2 rounded-lg focus:outline-none focus:ring-2 transition-all duration-200 ${
-                  otpVerified
-                    ? "border-green-500 bg-green-50 text-green-700"
-                    : otp[index]
+                className={`w-14 h-14 text-2xl text-center border-2 rounded-lg focus:outline-none focus:ring-2 transition-all duration-200 ${otpVerified
+                  ? "border-green-500 bg-green-50 text-green-700"
+                  : otp[index]
                     ? "border-blue-500 bg-blue-50"
                     : "border-gray-300 hover:border-gray-400"
-                } ${isLoading ? "opacity-50" : ""}`}
+                  } ${isLoading ? "opacity-50" : ""}`}
                 maxLength={1}
                 disabled={isLoading || otpVerified}
                 autoComplete="one-time-code"
@@ -463,13 +470,12 @@ export default function OtpInput() {
           {/* Message Display */}
           {message.text && (
             <div
-              className={`text-center p-3 rounded-lg ${
-                message.type === "error"
-                  ? "bg-red-50 text-red-700 border border-red-200"
-                  : message.type === "success"
+              className={`text-center p-3 rounded-lg ${message.type === "error"
+                ? "bg-red-50 text-red-700 border border-red-200"
+                : message.type === "success"
                   ? "bg-green-50 text-green-700 border border-green-200"
                   : "bg-blue-50 text-blue-700 border border-blue-200"
-              }`}
+                }`}
             >
               <div className="flex items-center justify-center gap-2">
                 {message.type === "success" && (
@@ -522,15 +528,13 @@ export default function OtpInput() {
               otpVerified ||
               otp.filter((digit) => digit !== "").length !== 6
             }
-            className={`w-full py-3 text-white font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 flex items-center justify-center shadow-md ${
-              isLoading || otpVerified
-                ? "bg-gradient-to-r from-blue-700 to-blue-800"
-                : "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
-            } ${
-              otp.filter((digit) => digit !== "").length !== 6
+            className={`w-full py-3 text-white font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 flex items-center justify-center shadow-md ${isLoading || otpVerified
+              ? "bg-gradient-to-r from-blue-700 to-blue-800"
+              : "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+              } ${otp.filter((digit) => digit !== "").length !== 6
                 ? "opacity-50 cursor-not-allowed"
                 : ""
-            }`}
+              }`}
           >
             {isLoading ? (
               <>

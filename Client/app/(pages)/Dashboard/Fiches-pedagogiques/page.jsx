@@ -101,7 +101,7 @@ export default function Page() {
   return (
     <div className="flex">
       <SideBar />
-      <main className="flex-1 p-12 ml-64 space-y-6 text-black bg-gray-50">
+      <main className="flex-1 p-12 ml-64 space-y-6 text-black bg-[#F9FAFB] h-dvh">
         {/* Header */}
         <div className="bg-white rounded-xl p-6 shadow-sm ring-1 ring-gray-200">
           <div className="flex justify-between items-start">

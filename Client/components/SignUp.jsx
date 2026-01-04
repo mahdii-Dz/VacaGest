@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import UnivEmailValidate from "./UnivEmailValidate";
 import Link from "next/link";
 import { GLobalContext } from "@/app/AppContext/Context";
@@ -11,6 +11,11 @@ function SignUp() {
   const [errors, setErrors] = useState({});
   const router = useRouter();
 
+  useEffect(() => {
+    if (localStorage.getItem("userData")) {
+      window.location.href = "/Dashboard";
+    }
+  }, []);
   const validateForm = () => {
     const newErrors = {};
 
@@ -99,9 +104,8 @@ function SignUp() {
                 required
                 onChange={handleChange}
                 value={FormData.fName || ""}
-                className={`w-full outline-none border ${
-                  errors.fName ? "border-red-500" : "border-black/20"
-                } rounded-md bg-[#F3F5F7] h-11 px-4`}
+                className={`w-full outline-none border ${errors.fName ? "border-red-500" : "border-black/20"
+                  } rounded-md bg-[#F3F5F7] h-11 px-4`}
                 placeholder="Prénom"
                 id="fName"
                 name="fName"
@@ -116,9 +120,8 @@ function SignUp() {
                 required
                 onChange={handleChange}
                 value={FormData.lName || ""}
-                className={`w-full outline-none border ${
-                  errors.lName ? "border-red-500" : "border-black/20"
-                } rounded-md bg-[#F3F5F7] h-11 px-4`}
+                className={`w-full outline-none border ${errors.lName ? "border-red-500" : "border-black/20"
+                  } rounded-md bg-[#F3F5F7] h-11 px-4`}
                 placeholder="Nom"
                 id="lName"
                 name="lName"
@@ -142,9 +145,8 @@ function SignUp() {
               required
               onChange={handleChange}
               value={FormData.phone || ""}
-              className={`w-full outline-none border ${
-                errors.phone ? "border-red-500" : "border-black/20"
-              } rounded-md bg-[#F3F5F7] h-11 px-4`}
+              className={`w-full outline-none border ${errors.phone ? "border-red-500" : "border-black/20"
+                } rounded-md bg-[#F3F5F7] h-11 px-4`}
               placeholder="Entrez votre numéro de téléphone"
               id="phone"
               name="phone"
@@ -167,9 +169,8 @@ function SignUp() {
               required
               onChange={handleChange}
               value={FormData.grade || ""}
-              className={`w-full outline-none border text-gray-500 ${
-                errors.grade ? "border-red-500" : "border-black/20"
-              } rounded-md bg-[#F3F5F7] h-11 px-3.5`}
+              className={`w-full outline-none border text-gray-500 ${errors.grade ? "border-red-500" : "border-black/20"
+                } rounded-md bg-[#F3F5F7] h-11 px-3.5`}
               style={{
                 appearance: "none",
                 WebkitAppearance: "none",
@@ -199,9 +200,8 @@ function SignUp() {
               onChange={handleChange}
               value={FormData.specialty || ""}
               name="specialty"
-              className={`w-full outline-none border ${
-                errors.specialty ? "border-red-500" : "border-black/20"
-              } rounded-md bg-[#F3F5F7] h-11 px-4`}
+              className={`w-full outline-none border ${errors.specialty ? "border-red-500" : "border-black/20"
+                } rounded-md bg-[#F3F5F7] h-11 px-4`}
               placeholder="Spécialité"
               id="specialty"
             />
@@ -216,9 +216,8 @@ function SignUp() {
               name="statue"
               onChange={handleChange}
               value={FormData.statue || ""}
-              className={`w-full outline-none border text-gray-500 ${
-                errors.statue ? "border-red-500" : "border-black/20"
-              } rounded-md bg-[#F3F5F7] h-11 px-3.5`}
+              className={`w-full outline-none border text-gray-500 ${errors.statue ? "border-red-500" : "border-black/20"
+                } rounded-md bg-[#F3F5F7] h-11 px-3.5`}
               style={{
                 appearance: "none",
                 WebkitAppearance: "none",
@@ -251,9 +250,8 @@ function SignUp() {
               onChange={handleChange}
               value={FormData.password || ""}
               name="password"
-              className={`w-full outline-none border ${
-                errors.password ? "border-red-500" : "border-black/20"
-              } rounded-md bg-[#F3F5F7] h-11 px-4`}
+              className={`w-full outline-none border ${errors.password ? "border-red-500" : "border-black/20"
+                } rounded-md bg-[#F3F5F7] h-11 px-4`}
               placeholder="Entrez votre mot de passe"
               id="password"
             />
@@ -262,7 +260,7 @@ function SignUp() {
             )}
           </div>
         </div>
- 
+
         <button
           className="w-full mt-6 bg-primary rounded-md h-11 text-white font-semibold cursor-pointer hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed"
           type="submit"

@@ -111,7 +111,7 @@ function Dashboard() {
 
 
   return (
-    <main className="w-full h-dvh ml-64 bg-[#F9FAFB] text-dashboard p-12 flex flex-col gap-8">
+    <main className="w-full h-dvh ml-64 bg-[#F9FAFB] text-dashboard p-12 flex flex-col gap-8 mb-12">
       <div>
         <h1 className="text-3xl font-bold">
           Bienvenue, {fullName || "Utilisateur"}
