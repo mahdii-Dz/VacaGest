@@ -15,6 +15,7 @@ export const uploadFile = async (req, res) => {
     }
 
     const {
+      Name,
       vacataireId,
       type, // "pedagogique" | "mensuelle"
       month,
@@ -53,6 +54,7 @@ export const uploadFile = async (req, res) => {
 
     const filename = req.file.originalname;
     const metadata = {
+      Name,
       vacataireId,
       type,
       status,
