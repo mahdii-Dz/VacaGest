@@ -55,12 +55,17 @@ function Dashboard() {
   const [FicheMensuelleData, setFicheMensuelleData] = useState([]);
   const [AllFilesData, setAllFilesData] = useState([]);
   const router = useRouter();
-  const date = new Date(user?.createdAt);
-  const readableDate = date.toLocaleDateString("fr-FR", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+
+  function formatDate(dateString) {
+    const date = new Date(dateString);
+    const formattedDate = date.toLocaleDateString("fr-FR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+    return `Soumis le ${formattedDate}`;
+  }
+  
 
   useEffect(() => {
     if (!isClient) return
@@ -200,7 +205,7 @@ function Dashboard() {
               <CardItem
                 key={file._id}
                 title={file.metadata.Name}
-                date={`Soumis le ${readableDate}`}
+                date={formatDate(file.uploadDate)}
                 status={file.metadata.status}
                 icon={file.metadata.type === "pedagogique" ? FileText : Calendar}
                 iconColor={file.metadata.type === "pedagogique" ? "text-primary" : "text-purple-600"}
