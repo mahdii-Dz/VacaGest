@@ -170,7 +170,7 @@ function Dashboard() {
           <p className="text-sm font-medium text-[#4B5563]">Total heures</p>
           <h3 className="text-2xl font-bold">
             {
-              FichePedagogiqueData.length === 0 ? `0 h/mois` : `${FichePedagogiqueData[0]?.metadata.hours} h/mois`
+              FichePedagogiqueData.length === 0 ? `0 h` : `${FichePedagogiqueData[0]?.metadata.hours} h`
             }
             
             </h3>
