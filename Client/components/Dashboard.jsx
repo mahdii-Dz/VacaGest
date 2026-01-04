@@ -196,7 +196,7 @@ function Dashboard() {
         <h3 className="text-lg font-semibold">Documents récents</h3>
         <div className="flex flex-col gap-4">
           {
-            AllFilesData.slice(0, 3).map((file) => (
+            AllFilesData.slice(-3).reverse().map((file) => (
               <CardItem
                 key={file._id}
                 title={file.metadata.Name}
