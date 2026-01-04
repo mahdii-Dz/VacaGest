@@ -168,7 +168,12 @@ function Dashboard() {
             <Clock size={18} strokeWidth={2.5} className="text-[#4F46E5]" />
           </div>
           <p className="text-sm font-medium text-[#4B5563]">Total heures</p>
-          <h3 className="text-2xl font-bold">156h</h3>
+          <h3 className="text-2xl font-bold">
+            {
+              FichePedagogiqueData.length === 0 ? `0 h/mois` : `${FichePedagogiqueData[0]?.metadata.hours} h/mois`
+            }
+            
+            </h3>
           <p className="text-sm font-medium text-[#4B5563]">
             Ce semestre académique
           </p>

@@ -33,6 +33,7 @@ export default async function handleSend({
     formData.append("file", pdfBlob, filename);
     formData.append("vacataireId", vacataireId);
     formData.append("Name", Name);
+    formData.append("hours", hours);
     formData.append("type", type);
     if (month) formData.append("month", month);
     if (year) formData.append("year", year);
