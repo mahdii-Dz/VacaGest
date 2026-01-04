@@ -1,5 +1,6 @@
 "use client";
 import useLocalStorage from "@/components/useLocalStorage";
+import { fetchWithCache } from "@/utils/cachedFetch";
 import { Calendar, Clock, FileText, Plus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -16,7 +17,7 @@ const StatusBadge = ({ status, color }) => {
     <div className={`px-3 ${colors[status]?.bg} py-1 rounded-full font-semibold text-xs ${colors[status]?.text || color?.text
       }`}>
       {
-        status === "validated" ? "Validée" : status === "pending" ? "En attente" : status === "rejected" ? "Rejetée" : "Inconnu"
+        status === "validated" ? "Validée" : status === "pending" ? "En attente" : status === "rejected" ? "Rejetée" : ""
       }
     </div>
   );
@@ -52,16 +53,23 @@ function Dashboard() {
   const [user, setUser, removeUser, isClient] = useLocalStorage("userData");
   const [FichePedagogiqueData, setFichePedagogiqueData] = useState([]);
   const [FicheMensuelleData, setFicheMensuelleData] = useState([]);
+  const [AllFilesData, setAllFilesData] = useState([]);
   const router = useRouter();
-
+  const date = new Date(user?.createdAt);
+  const readableDate = date.toLocaleDateString("fr-FR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 
   useEffect(() => {
     if (!isClient) return
     async function fetchFilesData() {
       try {
-        const response = await fetch(`https://vacagest.onrender.com/api/files?vacataireId=${user?._id}`);
-        const data = await response.json();
-        console.log("Données des fichiers reçues du serveur :", data);
+        const cacheKey = `pedagogique-${user._id}`;
+        const url = `https://vacagest.onrender.com/api/files?vacataireId=${user._id}`;
+        const data = await fetchWithCache(cacheKey, url);
+        setAllFilesData(data || []);
         const pedagogicalFiles = data.filter(file => file.metadata.type === "pedagogique");
         setFichePedagogiqueData(pedagogicalFiles || null);
         const monthlyFiles = data.filter(file => file.metadata.type === "mensuelle");
@@ -74,7 +82,9 @@ function Dashboard() {
   }, [isClient, user?._id])
   const ValidatedFicheMensuelle = FicheMensuelleData.filter(file => file?.metadata.status === "validated");
   const pendingFicheMensuelle = FicheMensuelleData.filter(file => file?.metadata.status === "pending");
- 
+
+  console.log(AllFilesData);
+
 
   useEffect(() => {
     if (isClient && !user) {
@@ -185,32 +195,20 @@ function Dashboard() {
       <div className="w-full rounded-xl p-6 bg-white flex flex-col gap-4 shadow-boxShadow border border-[#E5E7EB]">
         <h3 className="text-lg font-semibold">Documents récents</h3>
         <div className="flex flex-col gap-4">
-          <CardItem
-            title="Fiche pédagogique - Mathématiques L1"
-            date="Soumis le 15 Jan 2024"
-            status="validated"
-            icon={FileText}
-            iconColor="text-primary"
-            bgColor="bg-blue-100"
-          />
+          {
+            AllFilesData.slice(0, 3).map((file) => (
+              <CardItem
+                key={file._id}
+                title={file.metadata.Name}
+                date={`Soumis le ${readableDate}`}
+                status={file.metadata.status}
+                icon={file.metadata.type === "pedagogique" ? FileText : Calendar}
+                iconColor={file.metadata.type === "pedagogique" ? "text-primary" : "text-purple-600"}
+                bgColor={file.metadata.type === "pedagogique" ? "bg-blue-100" : "bg-purple-100"}
+              />
+            ))
+          }
 
-          <CardItem
-            title="Fiche mensuelle - Janvier 2024"
-            date="Soumis le 10 Jan 2024"
-            status="pending"
-            icon={Calendar}
-            iconColor="text-[#9333EA]"
-            bgColor="bg-purple-100"
-          />
-
-          <CardItem
-            title="Fiche pédagogique - Physique L2"
-            date="Soumis le 08 Jan 2024"
-            status="rejected"
-            icon={FileText}
-            iconColor="text-primary"
-            bgColor="bg-blue-100"
-          />
         </div>
       </div>
     </main>

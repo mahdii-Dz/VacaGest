@@ -19,7 +19,7 @@ export default function Page() {
   const [numeroVacataire, setNumeroVacataire] = useState("VAC-2025-0158");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
-
+  const fullName = user ? `${user.fName} ${user.lName}`.trim() : "";
   const handleSubmit = async () => {
     if (isSubmitting || hasSubmitted) return;
 
@@ -30,8 +30,9 @@ export default function Page() {
         generatePDF: handleGeneratePDF,
         vacataireId: user?._id,
         type: "mensuelle",
+        fullName: fullName,
         month: mois,
-        year: "2024",
+        year: "2025",
         status: "pending",
       });
 
@@ -44,7 +45,7 @@ export default function Page() {
       setIsSubmitting(false);
     }
   }
-  const fullName = user ? `${user.fName} ${user.lName}`.trim() : "";
+
   const total = rows.reduce((s, r) => s + r.heures, 0);
 
   const handleAddRow = (newRow) => setRows((prev) => [...prev, newRow]);
@@ -103,7 +104,7 @@ export default function Page() {
             <h1 className="text-2xl font-bold">
               Déclaration Mensuelle d&apos;Heures
             </h1>
-            <p>Mars 2024 – Année universitaire 2024-2025</p>
+            <p>Année universitaire 2024-2025</p>
           </div>
           <button className="px-4 py-2 rounded-lg bg-blue-100 border border-blue-200">
             Brouillon

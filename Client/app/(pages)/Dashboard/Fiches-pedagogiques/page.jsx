@@ -34,12 +34,13 @@ export default function Page() {
       await handleSend({
         generatePDF: handleGeneratePDF,
         vacataireId: user?._id,
+        fullName: fullName,
         type: "pedagogique",
         status: "pending",
       });
 
       alert("✅ Déclaration soumise avec succès !");
-      setHasSubmitted(true); // 🔒 Lock further submissions
+      setHasSubmitted(true);
     } catch (err) {
       console.error(err);
       alert(`❌ Erreur: ${err.message}`);
@@ -206,10 +207,13 @@ export default function Page() {
             <button
               onClick={() => {
                 const pdfBlob = handleGeneratePDF();
+                const cleanName = fullName.replace(/\s+/g, "_").replace(/[^\w\u0600-\u06FF]/g, "");
+                const filename = `${cleanName}_fiche_pedagogique.pdf`;
+
                 const url = URL.createObjectURL(pdfBlob);
                 const a = document.createElement("a");
                 a.href = url;
-                a.download = "fiche_pedagogique.pdf";
+                a.download = filename;
                 a.click();
                 URL.revokeObjectURL(url);
               }}
@@ -222,8 +226,8 @@ export default function Page() {
               onClick={handleSubmit}
               disabled={isSubmitting || hasSubmitted}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg ${hasSubmitted
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700"
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
                 } text-white`}
             >
               {isSubmitting ? (

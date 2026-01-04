@@ -62,7 +62,6 @@ export const uploadFile = async (req, res) => {
     };
 
     if (type === "mensuelle") {
-      metadata.month = parseInt(month, 10);
       metadata.year = parseInt(year, 10);
     }
 
