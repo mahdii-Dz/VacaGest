@@ -37,6 +37,7 @@ export default function Page() {
       });
 
       alert("✅ Déclaration soumise avec succès !");
+      localStorage.removeItem(`pedagogique-${user._id}`);
       setHasSubmitted(true); // 🔒 Lock further submissions
     } catch (err) {
       console.error(err);
