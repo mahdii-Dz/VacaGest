@@ -111,9 +111,10 @@ export const getUser = async (req, res) => {
   try {
     const email = req.params.email;
     const user = await User.findOne({ email });
+    const { password: _, ...userData } = user.toObject();
     res.status(200).json({
       message: "Register successful.",
-      user: user,
+      user: userData,
     });
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error." });
