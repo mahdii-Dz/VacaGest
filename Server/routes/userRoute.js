@@ -3,6 +3,7 @@ import {
   create,
   deleteUser,
   fetch,
+  getUser,
   login,
   update
 } from "../controller/userController.js";
