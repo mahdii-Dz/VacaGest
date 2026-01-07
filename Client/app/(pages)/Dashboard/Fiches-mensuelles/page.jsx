@@ -30,6 +30,7 @@ export default function Page() {
         generatePDF: handleGeneratePDF,
         vacataireId: user?._id,
         type: "mensuelle",
+        specialty: user?.specialty,
         fullName: fullName,
         month: mois,
         year: annee,

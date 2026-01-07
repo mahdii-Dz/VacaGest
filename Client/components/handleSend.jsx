@@ -25,7 +25,7 @@ export default async function handleSend({
       : `${month}_${year}_declaration_mensuelle`;
     const Name = type === "pedagogique"
       ? "Fiche Pedagogique"
-      : `Declaration Mensuelle - ${month}/${year} `;  
+      : `Declaration Mensuelle`;  
 
     const filename = `${cleanName}_${baseName}.pdf`;
 

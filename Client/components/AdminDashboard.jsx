@@ -14,80 +14,34 @@ import {
 
 
 const fetchValidationData = async () => {
-    // try{
-    //     const response = await fetch('https://vacagest.onrender.com/api/files/',{
-    //         headers:{
-    //             'Content-Type': 'application/json',
-    //         }
-    //     });
-    //     const data = await response.json();
-    //     return data
-    // }catch(err){
-    //     console.error(err);
-    // }
-    return [
-        {
-            id: 1,
-            initials: "JD",
-            name: "Jean Dupont",
-            subject: "Mathématiques",
-            avatarColor: "bg-blue-600",
-            ficheType: "Fiche pédagogique",
-            month: "Novembre 2024",
-            status: "En attente",
-        },
-        {
-            id: 2,
-            initials: "SM",
-            name: "Sophie Martin",
-            subject: "Physique",
-            avatarColor: "bg-purple-600",
-            ficheType: "Fiche mensuelle",
-            month: "Octobre 2024",
-            status: "En attente",
-        },
-        {
-            id: 3,
-            initials: "PB",
-            name: "Pierre Bernard",
-            subject: "Informatique",
-            avatarColor: "bg-green-600",
-            ficheType: "Fiche pédagogique",
-            month: "Novembre 2024",
-            status: "En attente",
-        },
-        {
-            id: 4,
-            initials: "AL",
-            name: "Anne Laurent",
-            subject: "Chimie",
-            avatarColor: "bg-orange-600",
-            ficheType: "Fiche mensuelle",
-            month: "Novembre 2024",
-            status: "En attente",
-        },
-        {
-            id: 5,
-            initials: "TD",
-            name: "Thomas Dubois",
-            subject: "Biologie",
-            avatarColor: "bg-red-600",
-            ficheType: "Fiche pédagogique",
-            month: "Octobre 2024",
-            status: "En attente",
-        },
-        {
-            id: 6,
-            initials: "CR",
-            name: "Claire Rousseau",
-            subject: "Économie",
-            avatarColor: "bg-indigo-600",
-            ficheType: "Fiche mensuelle",
-            month: "Novembre 2024",
-            status: "En attente",
-        },
-    ];
+    try {
+        const response = await fetch('https://vacagest.onrender.com/api/files/', {
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        const data = await response.json();
+        const dataWithColors = data.map(item => ({
+            ...item,
+            _color: stringToColor(item.metadata.vacataire)
+        }));
+        return dataWithColors
+    } catch (err) {
+        console.error(err);
+    }
 };
+function stringToColor(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    let color = '#';
+    for (let i = 0; i < 3; i++) {
+        const value = (hash >> (i * 8)) & 0xFF;
+        color += value.toString(16).padStart(2, '0');
+    }
+    return color;
+}
 
 const fetchStatsData = async () => {
     await new Promise((resolve) => setTimeout(resolve, 300));
@@ -232,11 +186,26 @@ function AdminDashboard() {
         }
     };
 
+    function fileMonth(type, month = '', uploadedAt) {
+        if (type === 'Fiche Pedagogique') {
+            const month = new Date(uploadedAt).toLocaleDateString("fr-FR", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+            });
+            return month
+        } else {
+            return month
+        }
+    }
+    function Initials(fullname) {
+        const [firstName, lastName] = fullname.trim().split(/\s+/);
+        return (firstName?.[0].toUpperCase() || '') + (lastName?.[0].toUpperCase() || '')
+    }
+
     // Simple search filter (you can enhance with backend filtering)
     const filteredData = data.filter((item) =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.ficheType.toLowerCase().includes(searchQuery.toLowerCase())
+        item.metadata.vacataire.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     if (loading) {
@@ -323,27 +292,29 @@ function AdminDashboard() {
                         <tbody className="divide-y divide-gray-200 w-full">
                             {filteredData.length > 0 ? (
                                 filteredData.map((item, index) => (
-                                    <tr key={item.id} className={index > 0 ? "border-t border-gray-200" : ""}>
+                                    <tr key={item._id} className={index > 0 ? "border-t border-gray-200" : ""}>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
-                                                <div className={`${item.avatarColor} w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold`}>
-                                                    {item.initials}
+                                                <div
+                                                    style={{ backgroundColor: item._color }}
+                                                    className={` w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold`}>
+                                                    {Initials(item.metadata.vacataire)}
                                                 </div>
                                                 <div className="ml-4">
-                                                    <div className="text-sm font-medium text-gray-900">{item.name}</div>
-                                                    <div className="text-sm text-gray-500">{item.subject}</div>
+                                                    <div className="text-sm font-medium text-gray-900">{item.metadata.vacataire}</div>
+                                                    <div className="text-sm text-gray-500">{item.metadata.specialty}</div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {item.ficheType}
+                                            {item.metadata.Name}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {item.month}
+                                            {fileMonth(item.metadata.Name, item.metadata?.month, item.metadata.uploadedAt)}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span className="px-3 py-1 text-xs font-semibold text-orange-700 bg-orange-100 rounded-full">
-                                                {item.status}
+                                                {item.metadata.status}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
@@ -351,7 +322,7 @@ function AdminDashboard() {
                                                 <button
                                                     onClick={() => handleView(item.id)}
                                                     className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                                                    aria-label={`Voir la fiche de ${item.name}`}
+                                                    aria-label={`Voir la fiche de ${item.metadata.vacataire}`}
                                                 >
                                                     <Eye size={12} />
                                                     Voir
@@ -359,7 +330,7 @@ function AdminDashboard() {
                                                 <button
                                                     onClick={() => handleValidate(item.id)}
                                                     className="flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                                                    aria-label={`Valider la fiche de ${item.name}`}
+                                                    aria-label={`Valider la fiche de ${item.metadata.vacataire}`}
                                                 >
                                                     <Check size={12} />
                                                     Valider
@@ -367,7 +338,7 @@ function AdminDashboard() {
                                                 <button
                                                     onClick={() => handleReject(item.id)}
                                                     className="flex items-center gap-1 px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                                                    aria-label={`Rejeter la fiche de ${item.name}`}
+                                                    aria-label={`Rejeter la fiche de ${item.metadata.vacataire}`}
                                                 >
                                                     <X size={12} />
                                                     Rejeter

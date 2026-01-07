@@ -61,6 +61,8 @@ export const uploadFile = async (req, res) => {
       specialty,
       vacataireId,
       type,
+      month,
+      year,
       status,
       uploadedAt: new Date(),
     };
