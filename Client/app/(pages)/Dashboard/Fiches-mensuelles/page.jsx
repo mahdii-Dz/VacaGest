@@ -21,7 +21,7 @@ export default function Page() {
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const fullName = user ? `${user.fName} ${user.lName}`.trim() : "";
   const handleSubmit = async () => {
-    if (isSubmitting || hasSubmitted) return;
+    if (isSubmitting || hasSubmitted || rows.length === 0 ) return;
 
     setIsSubmitting(true);
 
@@ -50,6 +50,8 @@ export default function Page() {
   const total = rows.reduce((s, r) => s + r.heures, 0);
 
   const handleAddRow = (newRow) => setRows((prev) => [...prev, newRow]);
+  console.log(rows);
+  
 
   const handleUpdateRow = (updatedRow) => {
     if (!editingData) return;
@@ -143,7 +145,7 @@ export default function Page() {
                 setEditingData(null);
                 setOpenModal(true);
               }}
-              className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+              className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
             >
               + Ajouter une séance
             </button>
@@ -170,7 +172,7 @@ export default function Page() {
                   <td className="p-3 border border-gray-200">{r.heures}</td>
                   <td className="p-3 border border-gray-200 text-center">
                     <button
-                      className="text-blue-600 hover:underline"
+                      className="text-blue-600 hover:underline cursor-pointer"
                       onClick={() => {
                         setEditingData(r);
                         setOpenModal(true);
@@ -203,7 +205,7 @@ export default function Page() {
 
         {/* Buttons */}
         <div className="flex justify-between gap-4">
-          <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700">
+          <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 cursor-pointer">
             <Save size={16} /> Enregistrer
           </button>
           <div className="flex gap-3">
@@ -217,14 +219,14 @@ export default function Page() {
                 a.click();
                 URL.revokeObjectURL(url);
               }}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-700 text-white hover:bg-gray-800"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-700 text-white hover:bg-gray-800 cursor-pointer"
             >
               <FileDown size={16} /> Télécharger PDF
             </button>
             <button
               onClick={handleSubmit}
               disabled={isSubmitting || hasSubmitted}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg ${hasSubmitted
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer ${hasSubmitted
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-blue-600 hover:bg-blue-700"
                 } text-white`}

@@ -12,7 +12,7 @@ export default function AjouterModuleModal({ onClose, onAdd }) {
   const [departement, setDepartement] = useState("");
 
   const handleSubmit = () => {
-    if (!module || !section || !heures || !salle) {
+    if (!module || !section || !heures || !salle || !departement || !type) {
       return;
     }
 
@@ -45,7 +45,7 @@ export default function AjouterModuleModal({ onClose, onAdd }) {
 
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-black transition"
+            className="text-gray-400 hover:text-black transition cursor-pointer"
             aria-label="Fermer"
           >
             <X size={18} />
@@ -136,11 +136,11 @@ export default function AjouterModuleModal({ onClose, onAdd }) {
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-3 p-6 border-t bg-gray-50">
+        <div className="flex justify-end gap-3 p-6 border-t bg-gray-50 ">
           <button
             onClick={onClose}
             type="button"
-            className="px-4 py-2 border border-gray-300 rounded-lg"
+            className="px-4 py-2 border border-gray-300 hover:bg-gray-100 bg-white rounded-lg cursor-pointer"
           >
             Annuler
           </button>
@@ -148,7 +148,7 @@ export default function AjouterModuleModal({ onClose, onAdd }) {
           <button
             onClick={handleSubmit}
             type="button"
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 cursor-pointer text-white rounded-lg"
           >
             <Plus size={16} />
             Ajouter

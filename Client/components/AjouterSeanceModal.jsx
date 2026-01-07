@@ -50,7 +50,7 @@ export default function AjouterSeanceModal({ onClose, onAdd, onUpdate, initialDa
 
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-black transition"
+            className="text-gray-400 hover:text-black transition cursor-pointer"
             aria-label="Fermer"
           >
             <X size={18} />
@@ -119,7 +119,7 @@ export default function AjouterSeanceModal({ onClose, onAdd, onUpdate, initialDa
           <button
             onClick={onClose}
             type="button"
-            className="px-4 py-2 border border-gray-300 rounded-lg"
+            className="px-4 py-2 border border-gray-300 hover:bg-gray-100 bg-white rounded-lg cursor-pointer"
           >
             Annuler
           </button>
@@ -127,7 +127,7 @@ export default function AjouterSeanceModal({ onClose, onAdd, onUpdate, initialDa
           <button
             onClick={handleSubmit}
             type="button"
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg cursor-pointer"
           >
             <Plus size={16} />
             {initialData ? "Mettre à jour" : "Ajouter"}

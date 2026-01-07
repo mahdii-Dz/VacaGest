@@ -27,7 +27,7 @@ export default function Page() {
   const total = rows.reduce((s, r) => s + r.heures, 0);
 
   const handleSubmit = async () => {
-    if (isSubmitting || hasSubmitted) return;
+    if (isSubmitting || hasSubmitted || !rows.length) return;
 
     setIsSubmitting(true);
 
@@ -173,7 +173,7 @@ export default function Page() {
                   <td className="p-3 border border-gray-200">
                     <button
                       onClick={() => handleDeleteRow(i)}
-                      className="text-red-600 hover:text-red-700"
+                      className="text-red-600 hover:text-red-700 cursor-pointer"
                       aria-label="Supprimer"
                     >
                       <Trash2 size={16} />
@@ -187,7 +187,7 @@ export default function Page() {
           <div className="flex justify-between items-center p-4">
             <button
               onClick={() => setOpenModal(true)}
-              className="flex items-center gap-2 px-4 py-2 border border-blue-600 rounded-lg text-blue-600 hover:bg-blue-50"
+              className="flex items-center gap-2 px-4 py-2 border border-blue-600 rounded-lg text-blue-600 cursor-pointer hover:bg-blue-50"
             >
               <Plus size={16} />
               Ajouter une ligne
@@ -202,7 +202,7 @@ export default function Page() {
 
         {/* Actions */}
         <div className="flex justify-between">
-          <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700">
+          <button className="flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer bg-green-600 text-white hover:bg-green-700">
             <Save size={16} /> Enregistrer
           </button>
 
@@ -220,7 +220,7 @@ export default function Page() {
                 a.click();
                 URL.revokeObjectURL(url);
               }}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-700 text-white hover:bg-gray-800"
+              className="flex items-center cursor-pointer gap-2 px-4 py-2 rounded-lg bg-gray-700 text-white hover:bg-gray-800"
             >
               <FileDown size={16} /> Télécharger PDF
             </button>
@@ -228,7 +228,7 @@ export default function Page() {
             <button
               onClick={handleSubmit}
               disabled={isSubmitting || hasSubmitted}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg ${hasSubmitted
+              className={`flex items-center gap-2 px-4 py-2 cursor-pointer rounded-lg ${hasSubmitted
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-blue-600 hover:bg-blue-700"
                 } text-white`}
