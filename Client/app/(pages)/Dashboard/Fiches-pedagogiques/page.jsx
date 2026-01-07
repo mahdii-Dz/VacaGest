@@ -36,6 +36,7 @@ export default function Page() {
         generatePDF: handleGeneratePDF,
         vacataireId: user?._id,
         hours: total,
+        specialty: userSpecialty,
         fullName: fullName,
         type: "pedagogique",
         status: "pending",

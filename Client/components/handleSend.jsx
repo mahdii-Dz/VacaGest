@@ -1,9 +1,9 @@
-// components/handleSend.js
 export default async function handleSend({
   generatePDF,
   vacataireId,
   hours,
   type,
+  specialty,
   fullName, 
   month = "",
   year = "",
@@ -33,6 +33,8 @@ export default async function handleSend({
     formData.append("file", pdfBlob, filename);
     formData.append("vacataireId", vacataireId);
     formData.append("Name", Name);
+    formData.append("vacataire", fullName);
+    formData.append("specialty", specialty);
     formData.append("hours", hours);
     formData.append("type", type);
     if (month) formData.append("month", month);

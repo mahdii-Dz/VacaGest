@@ -17,6 +17,8 @@ export const uploadFile = async (req, res) => {
     const {
       hours,
       Name,
+      vacataire,
+      specialty,
       vacataireId,
       type, // "pedagogique" | "mensuelle"
       month,
@@ -45,11 +47,9 @@ export const uploadFile = async (req, res) => {
     // For mensuelle, month and year are required
     if (type === "mensuelle") {
       if (!month || !year) {
-        return res
-          .status(400)
-          .json({
-            error: "Month and year are required for monthly declarations",
-          });
+        return res.status(400).json({
+          error: "Month and year are required for monthly declarations",
+        });
       }
     }
 
@@ -57,6 +57,8 @@ export const uploadFile = async (req, res) => {
     const metadata = {
       hours,
       Name,
+      vacataire,
+      specialty,
       vacataireId,
       type,
       status,
@@ -174,12 +176,9 @@ export const updateFileStatus = async (req, res) => {
     }
 
     if (!["pending", "validated", "rejected"].includes(status)) {
-      return res
-        .status(400)
-        .json({
-          error:
-            "Invalid status. Must be 'pending', 'validated', or 'rejected'",
-        });
+      return res.status(400).json({
+        error: "Invalid status. Must be 'pending', 'validated', or 'rejected'",
+      });
     }
 
     const result = await mongoose.connection.db
