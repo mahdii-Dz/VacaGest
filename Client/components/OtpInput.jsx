@@ -14,6 +14,7 @@ export default function OtpInput() {
   const [message, setMessage] = useState({ text: "", type: "" });
   const [isResendDisabled, setIsResendDisabled] = useState(true);
   const [otpVerified, setOtpVerified] = useState(false);
+  const hasSentOtpRef = useRef(false);
 
   const inputRefs = useRef([]);
   const router = useRouter();
@@ -60,8 +61,9 @@ export default function OtpInput() {
 
   // Auto send OTP on component mount
   useEffect(() => {
-    if (FormData.email) {
+    if (FormData.email && !hasSentOtpRef.current) {
       sendOtpOnMount();
+      hasSentOtpRef.current = true;
     }
   }, [FormData.email]);
 
@@ -330,11 +332,11 @@ export default function OtpInput() {
         }));
 
 
-        
+
         // Create user after verification
         try {
           await createUser();
-          const userData = await FetchUser({email: FormData.email});
+          const userData = await FetchUser({ email: FormData.email });
           const user = userData.userData;
           localStorage.setItem(
             "userData",
