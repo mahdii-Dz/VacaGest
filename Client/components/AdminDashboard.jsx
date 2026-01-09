@@ -175,12 +175,6 @@ function AdminDashboard() {
         }
     };
 
-    const handlePageChange = (page) => {
-        if (page >= 1 && page <= 3) {
-            setCurrentPage(page);
-        }
-    };
-
     function fileMonth(type, month = '', uploadedAt, year = '') {
         if (type === 'Fiche Pedagogique') {
             const month = new Date(uploadedAt).toLocaleDateString("fr-FR", {
@@ -198,11 +192,20 @@ function AdminDashboard() {
         return (firstName?.[0].toUpperCase() || '') + (lastName?.[0].toUpperCase() || '')
     }
 
-    // Simple search filter (you can enhance with backend filtering)
+    const ITEMS_PER_PAGE = 10;
+    //filtered data
     const filteredData = data.filter((item) =>
         item.metadata.status.toLowerCase().includes('pending') &&
         item.metadata.vacataire.toLowerCase().includes(searchQuery.toLowerCase())
     );
+    // Paginate
+    const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const paginatedData = filteredData.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchQuery]);
 
     if (loading) {
         return (
@@ -304,8 +307,8 @@ function AdminDashboard() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 w-full">
-                            {filteredData.length > 0 ? (
-                                filteredData.map((item, index) => (
+                            {paginatedData.length > 0 ? (
+                                paginatedData.map((item, index) => (
                                     <tr key={item._id} className={index > 0 ? "border-t border-gray-200" : ""}>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
@@ -371,50 +374,68 @@ function AdminDashboard() {
                         </tbody>
                     </table>
                 </div>
-
                 {/* Footer / Pagination */}
-                <footer className="p-6 border-t border-gray-200 w-full">
-                    <div className="flex items-center justify-between">
-                        <p className="text-sm text-gray-600">
-                            Affichage de 1 à {filteredData.length} sur 24 fiches
-                        </p>
+                {
+                    data.length > 0 && (
+                        <footer className="p-6 border-t border-gray-200 w-full">
+                            <div className="flex items-center justify-between">
+                                <p className="text-sm text-gray-600">
+                                    Affichage de {startIndex + 1} à {Math.min(startIndex + ITEMS_PER_PAGE, filteredData.length)} sur {filteredData.length} fiches
+                                </p>
 
-                        <nav className="flex items-center gap-2">
-                            <button
-                                onClick={() => handlePageChange(currentPage - 1)}
-                                disabled={currentPage === 1}
-                                className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                                aria-label="Page précédente"
-                            >
-                                Précédent
-                            </button>
+                                <nav className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                        disabled={currentPage === 1}
+                                        className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        aria-label="Page précédente"
+                                    >
+                                        Précédent
+                                    </button>
 
-                            {[1, 2, 3].map((page) => (
-                                <button
-                                    key={page}
-                                    onClick={() => handlePageChange(page)}
-                                    className={`px-3 py-2 text-sm font-medium rounded-lg ${currentPage === page
-                                        ? "bg-blue-600 text-white"
-                                        : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
-                                        }`}
-                                    aria-label={`Page ${page}`}
-                                    aria-current={currentPage === page ? "page" : undefined}
-                                >
-                                    {page}
-                                </button>
-                            ))}
+                                    {/* Dynamic page buttons (shows up to 5 pages) */}
+                                    {(() => {
+                                        const pages = [];
+                                        const maxVisible = 5;
+                                        let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+                                        let endPage = Math.min(totalPages, startPage + maxVisible - 1);
 
-                            <button
-                                onClick={() => handlePageChange(currentPage + 1)}
-                                disabled={currentPage === 3}
-                                className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                                aria-label="Page suivante"
-                            >
-                                Suivant
-                            </button>
-                        </nav>
-                    </div>
-                </footer>
+                                        if (endPage - startPage + 1 < maxVisible) {
+                                            startPage = Math.max(1, endPage - maxVisible + 1);
+                                        }
+
+                                        for (let i = startPage; i <= endPage; i++) {
+                                            pages.push(
+                                                <button
+                                                    key={i}
+                                                    onClick={() => setCurrentPage(i)}
+                                                    className={`px-3 py-2 text-sm font-medium rounded-lg ${currentPage === i
+                                                        ? "bg-blue-600 text-white"
+                                                        : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+                                                        }`}
+                                                    aria-label={`Page ${i}`}
+                                                    aria-current={currentPage === i ? "page" : undefined}
+                                                >
+                                                    {i}
+                                                </button>
+                                            );
+                                        }
+                                        return pages;
+                                    })()}
+
+                                    <button
+                                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                        disabled={currentPage === totalPages}
+                                        className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        aria-label="Page suivante"
+                                    >
+                                        Suivant
+                                    </button>
+                                </nav>
+                            </div>
+                        </footer>
+                    )
+                }
             </div>
         </section>
     );

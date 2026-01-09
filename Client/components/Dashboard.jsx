@@ -150,7 +150,8 @@ function Dashboard() {
                 className="text-[#9333EA]"
               />
             </div>
-            {
+            { 
+              FicheMensuelleData.length > 0 ?
               FicheMensuelleData.every(file => file?.metadata.status === "validated") ? (
                 <div className="py-1 px-3 text-[#10B981] bg-[#D1FAE5] w-fit rounded-full text-xs font-medium">
                   Validée
@@ -159,7 +160,7 @@ function Dashboard() {
                 <div className="py-1 px-3 text-[#C2410C] bg-[#FFEDD5] w-fit rounded-full text-xs font-medium">
                   En attente
                 </div>
-              )
+              ) : ''
             }
           </div>
           <p className="text-sm font-medium text-[#4B5563]">Fiche mensuelle</p>
