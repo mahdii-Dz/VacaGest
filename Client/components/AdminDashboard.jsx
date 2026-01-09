@@ -3,157 +3,114 @@
 import { useState, useEffect } from "react";
 import {
     Clock,
-    CheckCircle2,
-    XCircle,
     FileText,
     Search as SearchIcon,
     Eye,
     Check,
     X,
+    XIcon,
+    CheckIcon,
 } from "lucide-react";
+import { fetchWithCache } from "@/utils/cachedFetch";
+import useLocalStorage from "./useLocalStorage";
 
 
-const fetchValidationData = async () => {
-    try {
-        const response = await fetch('https://vacagest.onrender.com/api/files/', {
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        });
-        const data = await response.json();
-        const dataWithColors = data.map(item => ({
-            ...item,
-            _color: stringToColor(item.metadata.vacataire)
-        }));
-        return dataWithColors
-    } catch (err) {
-        console.error(err);
-    }
-};
-function stringToColor(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    let color = '#';
-    for (let i = 0; i < 3; i++) {
-        const value = (hash >> (i * 8)) & 0xFF;
-        color += value.toString(16).padStart(2, '0');
-    }
-    return color;
-}
-
-const fetchStatsData = async () => {
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    return [
+function AdminDashboard() {
+    const [user, , removeUser, isClient] = useLocalStorage("userData");
+    const [searchQuery, setSearchQuery] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const [data, setData] = useState([]);
+    const fullName = user ? `${user.fName} ${user.lName}`.trim() : "";
+    const [stats, setStats] = useState([
         {
             id: 1,
             label: "En attente",
-            value: "24",
-            icon: <Clock size={20} />,
+            value: 0,
+            icon: <Clock color="#EA580C" size={20} />,
             bgColor: "bg-orange-100",
             textColor: "text-orange-600",
         },
         {
             id: 2,
             label: "Validées",
-            value: "156",
-            icon: <CheckCircle2 size={20} />,
+            value: 0,
+            icon: <CheckIcon color="#16A34A" size={20} />,
             bgColor: "bg-green-100",
             textColor: "text-green-600",
         },
         {
             id: 3,
             label: "Rejetées",
-            value: "8",
-            icon: <XCircle size={20} />,
+            value: 0,
+            icon: <XIcon color="#DC2626" size={20} />,
             bgColor: "bg-red-100",
             textColor: "text-red-600",
         },
         {
             id: 4,
             label: "Total",
-            value: "188",
-            icon: <FileText size={20} />,
+            value: 0,
+            icon: <FileText color="#2563EB" size={20} />,
             bgColor: "bg-blue-100",
             textColor: "text-blue-600",
         },
-    ];
-};
-
-// ================================
-// Validation Stats Section (Top Cards)
-// ================================
-export const ValidationListSection = () => {
-    const [stats, setStats] = useState([]);
+    ]);
     const [loading, setLoading] = useState(true);
 
+    const fetchValidationData = async () => {
+        try {
+            const cacheKey = `stats`
+            const url = 'https://vacagest.onrender.com/api/files/'
+            const data = await fetchWithCache(cacheKey, url)
 
-    useEffect(() => {
-        const loadStats = async () => {
-            try {
-                // ✅ Replace this with your real API endpoint
-                const data = await fetchStatsData();
-                setStats(data);
-            } catch (error) {
-                console.error("Failed to load stats:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        loadStats();
-    }, []);
+            let pending = 0;
+            let validated = 0;
+            let rejected = 0;
 
-    if (loading) {
-        return (
-            <section className="flex items-start justify-center gap-6 w-full">
-                {[...Array(4)].map((_, i) => (
-                    <div
-                        key={i}
-                        className="flex-1 h-32 bg-gray-100 rounded-xl animate-pulse"
-                    />
-                ))}
-            </section>
-        );
+            data.forEach(item => {
+                if (item.metadata.status === "pending") pending++;
+                else if (item.metadata.status === "validated") validated++;
+                else if (item.metadata.status === "rejected") rejected++;
+            });
+
+            const total = data.length;
+
+            setStats(prevStats => [
+                { ...prevStats[0], value: pending },
+                { ...prevStats[1], value: validated },
+                { ...prevStats[2], value: rejected },
+                { ...prevStats[3], value: total }
+            ]);
+
+            const dataWithColors = data.map(item => ({
+                ...item,
+                _color: stringToColor(item.metadata.vacataire)
+            }));
+
+            return dataWithColors;
+        } catch (err) {
+            console.error(err);
+            return [];
+        }
+    };
+
+    function stringToColor(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        let color = '#';
+        for (let i = 0; i < 3; i++) {
+            const value = (hash >> (i * 8)) & 0xFF;
+            color += value.toString(16).padStart(2, '0');
+        }
+        return color;
     }
 
-    return (
-        <section className="flex items-start justify-center gap-6 w-full">
-            {stats.map((stat) => (
-                <article
-                    key={stat.id}
-                    className="flex-1 bg-white rounded-xl border border-gray-200 shadow-sm p-6"
-                >
-                    <div className="flex items-center gap-4">
-                        <div className={`${stat.bgColor} p-2 rounded-lg`}>
-                            {stat.icon}
-                        </div>
-                        <div>
-                            <p className="text-gray-500 text-sm font-medium">{stat.label}</p>
-                            <p className="text-gray-900 text-3xl font-bold mt-1">{stat.value}</p>
-                        </div>
-                    </div>
-                </article>
-            ))}
-        </section>
-    );
-};
-
-// ================================
-// Validation Dashboard Table
-// ================================
-function AdminDashboard() {
-    const [searchQuery, setSearchQuery] = useState("");
-    const [currentPage, setCurrentPage] = useState(1);
-    const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const loadData = async () => {
             try {
-                // ✅ Replace this with your real API call, e.g.:
-                // const res = await fetch('/api/validation-requests');
-                // const data = await res.json();
                 const data = await fetchValidationData();
                 setData(data);
             } catch (error) {
@@ -165,19 +122,57 @@ function AdminDashboard() {
         loadData();
     }, []);
 
-    const handleView = (id) => {
-        console.log("View:", id);
-        // ✅ Add real navigation or modal logic here
+    const handleView = async (fileName) => {
+        const pdfUrl = `https://vacagest.onrender.com/api/files/${fileName}`;
+
+        if (pdfUrl) {
+            window.open(pdfUrl, '_blank');
+        } else {
+            alert("Aucun fichier PDF disponible.");
+        }
+
     };
 
-    const handleValidate = (id) => {
-        console.log("Validate:", id);
-        // ✅ Call API: PATCH /api/validation/${id} with { status: "approved" }
+    const handleValidate = async (id) => {
+        try {
+            const response = await fetch(`https://vacagest.onrender.com/api/files/${id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    status: 'validated',
+                    validatedBy: fullName
+                })
+            })
+            const MSG = await response.json()
+            localStorage.removeItem('stats')
+            const data = await fetchValidationData();
+            setData(data);
+        } catch (err) {
+            console.error(err);
+        }
     };
 
-    const handleReject = (id) => {
-        console.log("Reject:", id);
-        // ✅ Call API: PATCH /api/validation/${id} with { status: "rejected" }
+    const handleReject = async (id) => {
+        try {
+            const response = await fetch(`https://vacagest.onrender.com/api/files/${id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    status: 'rejected',
+                    validatedBy: fullName
+                })
+            })
+            const MSG = await response.json()
+            localStorage.removeItem('stats')
+            const data = await fetchValidationData();
+            setData(data);
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     const handlePageChange = (page) => {
@@ -186,7 +181,7 @@ function AdminDashboard() {
         }
     };
 
-    function fileMonth(type, month = '', uploadedAt) {
+    function fileMonth(type, month = '', uploadedAt, year = '') {
         if (type === 'Fiche Pedagogique') {
             const month = new Date(uploadedAt).toLocaleDateString("fr-FR", {
                 year: "numeric",
@@ -195,7 +190,7 @@ function AdminDashboard() {
             });
             return month
         } else {
-            return month
+            return `${month} ${year}`
         }
     }
     function Initials(fullname) {
@@ -205,6 +200,7 @@ function AdminDashboard() {
 
     // Simple search filter (you can enhance with backend filtering)
     const filteredData = data.filter((item) =>
+        item.metadata.status.toLowerCase().includes('pending') &&
         item.metadata.vacataire.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
@@ -222,15 +218,33 @@ function AdminDashboard() {
 
     return (
         <section className="w-full h-auto p-12 ml-64 bg-[#F9FAFB] flex flex-col overflow-x-hidden">
-            <div>
+            <div className="mb-8">
                 <h1 className="text-3xl font-bold">
                     Validation des fiches
                 </h1>
                 <p className="text-[#4B5563]">
                     Gérez et validez les fiches soumises par les vacataires                </p>
             </div>
+            <section className="flex items-start justify-center gap-6 w-full">
+                {stats.map((stat) => (
+                    <article
+                        key={stat.id}
+                        className="flex-1 bg-white rounded-xl ring-1 ring-gray-200 p-6"
+                    >
+                        <div className="flex flex-col  items-start gap-4">
+                            <div className={`${stat.bgColor} p-3.5 rounded-lg`}>
+                                {stat.icon}
+                            </div>
+                            <div>
+                                <p className="text-gray-500 text-sm font-medium">{stat.label}</p>
+                                <p className="text-gray-900 text-3xl font-bold mt-1">{stat.value}</p>
+                            </div>
+                        </div>
+                    </article>
+                ))}
+            </section>
             {/* Header */}
-            <div className="bg-white rounded-xl w-full mt-6 shadow-Paragraph ring-1 ring-gray-200">
+            <div className="bg-white rounded-xl w-full mt-8 shadow-Paragraph ring-1 ring-gray-200">
 
                 <div className="p-6 border-b w-full border-gray-200">
                     <div className="flex items-center justify-between">
@@ -310,34 +324,34 @@ function AdminDashboard() {
                                             {item.metadata.Name}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {fileMonth(item.metadata.Name, item.metadata?.month, item.metadata.uploadedAt)}
+                                            {fileMonth(item.metadata.Name, item.metadata?.month, item.metadata.uploadedAt, item.metadata.year)}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className="px-3 py-1 text-xs font-semibold text-orange-700 bg-orange-100 rounded-full">
+                                            <span className={`px-3 py-1 text-xs font-semibold ${item.metadata.status === "pending" ? "text-orange-700 bg-orange-100" : item.metadata.status === "validated" ? "text-green-700 bg-green-100" : "text-red-700 bg-red-100"} rounded-full`}>
                                                 {item.metadata.status}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center gap-2">
                                                 <button
-                                                    onClick={() => handleView(item.id)}
-                                                    className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                                    onClick={() => handleView(item.filename)}
+                                                    className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer"
                                                     aria-label={`Voir la fiche de ${item.metadata.vacataire}`}
                                                 >
                                                     <Eye size={12} />
                                                     Voir
                                                 </button>
                                                 <button
-                                                    onClick={() => handleValidate(item.id)}
-                                                    className="flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                                                    onClick={() => handleValidate(item._id)}
+                                                    className="flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 cursor-pointer"
                                                     aria-label={`Valider la fiche de ${item.metadata.vacataire}`}
                                                 >
                                                     <Check size={12} />
                                                     Valider
                                                 </button>
                                                 <button
-                                                    onClick={() => handleReject(item.id)}
-                                                    className="flex items-center gap-1 px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                                                    onClick={() => handleReject(item._id)}
+                                                    className="flex items-center gap-1 px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 cursor-pointer"
                                                     aria-label={`Rejeter la fiche de ${item.metadata.vacataire}`}
                                                 >
                                                     <X size={12} />

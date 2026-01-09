@@ -51,7 +51,6 @@ export default function Page() {
   const total = rows.reduce((s, r) => s + r.heures, 0);
 
   const handleAddRow = (newRow) => setRows((prev) => [...prev, newRow]);
-  console.log(rows);
   
 
   const handleUpdateRow = (updatedRow) => {

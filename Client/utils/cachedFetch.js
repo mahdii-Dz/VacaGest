@@ -11,6 +11,8 @@ export async function fetchWithCache(key, url, options = {}) {
 
   // Fetch fresh data
   const response = await fetch(url, options);
+  console.log('data fetched');
+  
   if (!response.ok) throw new Error("Network response was not ok");
   
   const data = await response.json();
